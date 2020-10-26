@@ -1,0 +1,129 @@
+import random
+#所有吊頸台的圖案
+HANGMAN_PICS = ['''
+  +---+
+      |
+      |
+      |
+     ===''', '''
+  +---+
+  O   |
+      |
+      |
+     ===''', '''
+  +---+
+  O   |
+  |   |
+      |
+     ===''', '''
+  +---+
+  O   |
+ /|   |
+      |
+     ===''', '''
+  +---+
+  O   |
+ /|\  |
+      |
+     ===''', '''
+  +---+
+  O   |
+ /|\  |
+ /    |
+     ===''', '''
+  +---+
+  O   |
+ /|\  |
+ / \  |
+     ===''']
+#單字庫，共12個
+words = 'again barbecue bookstore basketball breakfast chicken google youtube facebook instagram movie volleyball'.split()
+
+#隨機回傳一個單字
+def getRandomWord(wordList):
+    wordIndex = random.randint(0, len(wordList) - 1)
+    return wordList[wordIndex]
+
+#顯示hangman主畫面
+def displayBoard(missedLetters, correctLetters, secretWord): 
+    print(HANGMAN_PICS[len(missedLetters)])#顯示hangman圖
+    print()
+
+    print('猜錯的字母:', end=' ')#顯示猜錯的字母
+    for letter in missedLetters:
+        print(letter, end=' ')
+    print()
+
+    blanks = '_' * len(secretWord) #顯示字母的底線
+
+    for i in range(len(secretWord)): #將猜中的字母取代空白底線
+        if secretWord[i] in correctLetters:
+            blanks = blanks[:i] + secretWord[i] + blanks[i+1:]
+
+    for letter in blanks: 
+        print(letter, end=' ')
+    print()
+
+#猜測字母並判斷是否錯誤
+def getGuess(alreadyGuessed): 
+    while True:
+        print('請猜一個字母')
+        guess = input()
+        guess = guess.lower() #轉為小寫字母
+        if len(guess) != 1: 
+            print('只能輸入一個字母，請重新輸入')
+        elif guess in alreadyGuessed:
+            print('此字母已猜過，請重新猜新字母')
+        elif guess not in 'abcdefghijklmnopqrstuvwxyz':
+            print('輸入錯誤，請輸入英文字母')
+        else:
+            return guess #回傳猜測字母
+
+#是否要重猜一次
+def playAgain():
+    print('再玩一次請輸入 yes，退出請輸入 no')
+    return input().lower().startswith('y')
+
+#def Decision(as_guess,as_secreWord):
+    
+print('\n')
+print('    HANGMAN GAME')
+missedLetters = '' #猜錯的字母
+correctLetters = '' #猜對的字母
+secretWord = getRandomWord(words) #隨機從單字庫中選出單字
+gameIsDone = False #決定遊戲是否結束
+
+while True:
+    displayBoard(missedLetters, correctLetters, secretWord) #顯示hangman圖，遊戲進行狀況
+    guess = getGuess(missedLetters + correctLetters) #玩家輸入字母
+
+    if guess in secretWord: #如果有猜中，檢查是否全部字母都猜對
+        correctLetters = correctLetters + guess
+        foundAllLetters = True
+        for i in range(len(secretWord)):
+            if secretWord[i] not in correctLetters:
+                foundAllLetters = False
+                break
+        if foundAllLetters:
+            print('正確答案為:' + secretWord + ' 恭喜答對!!')
+            gameIsDone = True
+    else: 
+        missedLetters = missedLetters + guess
+
+        # 檢查是否猜超過六次
+        if len(missedLetters) == len(HANGMAN_PICS) - 1:
+            displayBoard(missedLetters, correctLetters, secretWord)
+            print('小人已死亡!!!\n猜錯字母數: ' + str(len(missedLetters)))
+            print('猜對字母數: ' + str(len(correctLetters)))
+            print('正確答案為:"' + secretWord + '"')
+            gameIsDone = True
+
+    #詢問是否要再玩一次
+    if gameIsDone:
+        if playAgain():
+            missedLetters = ''
+            correctLetters = ''
+            gameIsDone = False
+            secretWord = getRandomWord(words)
+        else:
+            break
